@@ -17,10 +17,11 @@ namespace shop_app
 
             builder.Services.AddScoped<IServiceProduct, ServiceProduct>();
 
+            builder.Services.AddDbContext<CartContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
             builder.Services.AddDbContext<ProductContext>(options =>
-            {
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-            });
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             builder.Services.AddDbContext<UserContext>(options =>
             {
@@ -65,6 +66,15 @@ namespace shop_app
                     };
                 });
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowLocalhost",
+                    builder => builder
+                        .WithOrigins("http://127.0.0.1:5500") // Дозволяє доступ з вашого локального клієнта
+                        .AllowAnyHeader()
+                        .AllowAnyMethod());
+            });
+
 
             builder.Services.AddAuthorization();
 
@@ -88,6 +98,8 @@ namespace shop_app
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+
+            app.UseCors("AllowLocalhost");
 
             app.UseAuthentication();
             app.UseAuthorization();
